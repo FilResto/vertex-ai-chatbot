@@ -16,18 +16,18 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'europe-west1-docker.pkg.dev/$PROJECT_ID/vertex-ai-chatbot/chatbot:latest']
 
-  # Step 3: Deploy to Cloud Run (optional - uncomment if you want to deploy)
-  # - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-  #   entrypoint: 'gcloud'
-  #   args: [
-  #     'run', 'deploy', 'vertex-ai-chatbot',
-  #     '--image', 'gcr.io/$PROJECT_ID/vertex-ai-chatbot:$COMMIT_SHA',
-  #     '--region', 'europe-west1',
-  #     '--platform', 'managed',
-  #     '--allow-unauthenticated',
-  #     '--port', '5000',
-  #     '--set-env-vars', 'PROJECT_ID=$PROJECT_ID'
-  #   ]
+  # Step 3: Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args: [
+      'run', 'deploy', 'vertex-ai-chatbot',
+      '--image', 'europe-west1-docker.pkg.dev/$PROJECT_ID/vertex-ai-chatbot/chatbot:$COMMIT_SHA',
+      '--region', 'europe-west1',
+      '--platform', 'managed',
+      '--allow-unauthenticated',
+      '--port', '5000',
+      '--set-env-vars', 'PROJECT_ID=$PROJECT_ID,LOCATION=europe-west1,DB_HOST=$_DB_HOST,DB_USER=$_DB_USER,DB_PASSWORD=$_DB_PASSWORD,DB_NAME=$_DB_NAME'
+    ]
 
 # Images to be pushed to Artifact Registry
 images:
