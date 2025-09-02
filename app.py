@@ -117,11 +117,18 @@ def home():
     '''
 
 if __name__ == '__main__':
-    # Inizializza database all'avvio
-    init_database() # Inizializza il database
-    print("Database inizializzato!")
-    
-    # Usa la porta da variabile d'ambiente (Cloud Run) o default 5000 (locale)
-    port = int(os.environ.get('PORT', 5000))
-    print(f"Backend Flask avviato su porta {port}")
-    app.run(debug=True, host='0.0.0.0', port=port) # Avvia il server Flask
+    try:
+        # Inizializza database all'avvio
+        print("Inizializzazione database...")
+        init_database() # Inizializza il database
+        print("Database inizializzato!")
+        
+        # Usa la porta da variabile d'ambiente (Cloud Run) o default 5000 (locale)
+        port = int(os.environ.get('PORT', 5000))
+        print(f"Backend Flask avviato su porta {port}")
+        app.run(debug=False, host='0.0.0.0', port=port) # Avvia il server Flask
+    except Exception as e:
+        print(f"Errore durante l'avvio: {e}")
+        import traceback
+        traceback.print_exc()
+        raise
