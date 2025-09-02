@@ -4,17 +4,17 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: [
       'build', 
-      '-t', 'gcr.io/$PROJECT_ID/vertex-ai-chatbot:$COMMIT_SHA',
-      '-t', 'gcr.io/$PROJECT_ID/vertex-ai-chatbot:latest',
+      '-t', 'europe-west1-docker.pkg.dev/$PROJECT_ID/vertex-ai-chatbot/chatbot:$COMMIT_SHA',
+      '-t', 'europe-west1-docker.pkg.dev/$PROJECT_ID/vertex-ai-chatbot/chatbot:latest',
       '.'
     ]
 
-  # Step 2: Push the image to Google Container Registry
+  # Step 2: Push the image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/vertex-ai-chatbot:$COMMIT_SHA']
+    args: ['push', 'europe-west1-docker.pkg.dev/$PROJECT_ID/vertex-ai-chatbot/chatbot:$COMMIT_SHA']
 
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/vertex-ai-chatbot:latest']
+    args: ['push', 'europe-west1-docker.pkg.dev/$PROJECT_ID/vertex-ai-chatbot/chatbot:latest']
 
   # Step 3: Deploy to Cloud Run (optional - uncomment if you want to deploy)
   # - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -29,10 +29,10 @@ steps:
   #     '--set-env-vars', 'PROJECT_ID=$PROJECT_ID'
   #   ]
 
-# Images to be pushed to Google Container Registry
+# Images to be pushed to Artifact Registry
 images:
-  - 'gcr.io/$PROJECT_ID/vertex-ai-chatbot:$COMMIT_SHA'
-  - 'gcr.io/$PROJECT_ID/vertex-ai-chatbot:latest'
+  - 'europe-west1-docker.pkg.dev/$PROJECT_ID/vertex-ai-chatbot/chatbot:$COMMIT_SHA'
+  - 'europe-west1-docker.pkg.dev/$PROJECT_ID/vertex-ai-chatbot/chatbot:latest'
 
 # Options for the build
 options:
