@@ -1,27 +1,15 @@
 import os
-import logging
-import vertexai
-from vertexai.generative_models import GenerativeModel
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-from database import init_database, save_conversation, get_recent_conversations
-from config import Config
+import vertexai                           # Libreria per Google Vertex AI
+from vertexai.generative_models import GenerativeModel  # Modello AI Gemini
+from flask import Flask, request, jsonify # Flask per web server
+from flask_cors import CORS               # Per permettere richieste da browser
+from database import init_database, save_conversation, get_recent_conversations  # Funzioni database
+from config import Config                 # Configurazioni (database, project ID, etc.)
 
-# Setup logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-app = Flask(__name__)
-CORS(app)
 
 # Inizializza Vertex AI
-try:
-    vertexai.init(project=Config.PROJECT_ID, location=Config.LOCATION)
-    model = GenerativeModel("gemini-2.0-flash-exp")
-    logger.info("Vertex AI inizializzato correttamente")
-except Exception as e:
-    logger.error(f"Errore inizializzazione Vertex AI: {e}")
-    raise
+vertexai.init(project=Config.PROJECT_ID, location=Config.LOCATION) # Connessione a Google Cloud
+model = GenerativeModel("gemini-2.5-flash") # Carica il modello AI Gemini
 
 SYSTEM_PROMPT = """
 1. Rispondi SOLO alle seguenti FAQ della startup tech:
@@ -36,39 +24,33 @@ SYSTEM_PROMPT = """
 
 3. Non inventare informazioni non presenti nelle FAQ sopra.
 """
+# Le istruzioni per l'AI:
+    # - Risponde solo alle FAQ specifiche
+    # - Se chiedi altro, dice "Mi dispiace, posso rispondere solo alle FAQ"
+    # - Non inventa informazioni
 
-@app.route('/health', methods=['GET'])
-def health_check():
-    return jsonify({'status': 'healthy'}), 200
+app = Flask(__name__) # Crea l'applicazione Flask
+CORS(app) # Permette richieste da browser (per l'interfaccia web)
 
-@app.route('/chat', methods=['POST'])
+@app.route('/chat', methods=['POST']) # Route per ricevere messaggi
 def chat():
-    try:
-        user_message = request.json['message']
-        user_ip = request.remote_addr
-        
-        # Chiama Vertex AI
-        full_prompt = f"{SYSTEM_PROMPT}\n\nUtente: {user_message}\nAssistente:"
-        response = model.generate_content(full_prompt)
-        ai_response = response.text
-        
-        # Salva nel database
-        save_conversation(user_message, ai_response, user_ip)
-        
-        return jsonify({'response': ai_response})
+    user_message = request.json['message'] # Prende il messaggio dall'utente
+    user_ip = request.remote_addr # Prende l'IP dell'utente
     
-    except Exception as e:
-        logger.error(f"Errore in /chat: {e}")
-        return jsonify({'error': 'Errore interno del server'}), 500
+    # Chiama Vertex AI
+    full_prompt = f"{SYSTEM_PROMPT}\n\nUtente: {user_message}\nAssistente:"
+    response = model.generate_content(full_prompt) # Genera la risposta dell'AI
+    ai_response = response.text # Prende la risposta
+    
+    # 🔥 SALVA NEL DATABASE
+    save_conversation(user_message, ai_response, user_ip) # Salva tutto nel database
+    
+    return jsonify({'response': ai_response}) # Restituisce la risposta in JSON
 
 @app.route('/history', methods=['GET'])
 def get_history():
-    try:
-        conversations = get_recent_conversations(20)
-        return jsonify({'conversations': conversations})
-    except Exception as e:
-        logger.error(f"Errore in /history: {e}")
-        return jsonify({'error': 'Errore nel recupero cronologia'}), 500
+    conversations = get_recent_conversations(20) # Prende le ultime 20 conversazioni
+    return jsonify({'conversations': conversations}) # Le restituisce in JSON
 
 @app.route('/', methods=['GET'])
 def home():
@@ -76,7 +58,7 @@ def home():
     <!DOCTYPE html>
     <html>
     <head>
-        <title>Chatbot FAQ Startup</title>
+        <title>Chatbot FAQ Startup </title>
         <style>
             body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
             .chat-container { border: 1px solid #ddd; height: 400px; overflow-y: auto; padding: 10px; margin-bottom: 10px; }
@@ -108,10 +90,12 @@ def home():
                 const message = messageInput.value;
                 if (!message) return;
                 
+                // Aggiungi messaggio utente
                 chat.innerHTML += `<div class="user message">${message}</div>`;
                 messageInput.value = '';
                 chat.scrollTop = chat.scrollHeight;
                 
+                // Invia a AI
                 try {
                     const response = await fetch('/chat', {
                         method: 'POST',
@@ -120,14 +104,11 @@ def home():
                     });
                     const data = await response.json();
                     
-                    if (data.error) {
-                        chat.innerHTML += `<div class="ai message">Errore: ${data.error}</div>`;
-                    } else {
-                        chat.innerHTML += `<div class="ai message">${data.response}</div>`;
-                    }
+                    // Aggiungi risposta AI
+                    chat.innerHTML += `<div class="ai message">${data.response}</div>`;
                     chat.scrollTop = chat.scrollHeight;
                 } catch (error) {
-                    chat.innerHTML += `<div class="ai message">Errore di connessione: ${error.message}</div>`;
+                    chat.innerHTML += `<div class="ai message">Errore: ${error.message}</div>`;
                 }
             });
         </script>
@@ -137,17 +118,17 @@ def home():
 
 if __name__ == '__main__':
     try:
-        # Inizializza database
-        init_database()
-        logger.info("Database inizializzato!")
+        # Inizializza database all'avvio
+        print("Inizializzazione database...")
+        init_database() # Inizializza il database
+        print("Database inizializzato!")
         
-        # Porta da environment o default
-        port = int(os.environ.get('PORT', 5000))
-        logger.info(f"Avvio server su porta {port}")
-        
-        # IMPORTANTE: debug=False in produzione!
-        app.run(debug=False, host='0.0.0.0', port=port)
-        
+        # Usa la porta da variabile d'ambiente (Cloud Run) o default 8080 (locale)
+        port = int(os.environ.get('PORT', 8080))
+        print(f"Backend Flask avviato su porta {port}")
+        app.run(debug=False, host='0.0.0.0', port=port) # Avvia il server Flask
     except Exception as e:
-        logger.error(f"Errore fatale all'avvio: {e}")
+        print(f"Errore durante l'avvio: {e}")
+        import traceback
+        traceback.print_exc()
         raise

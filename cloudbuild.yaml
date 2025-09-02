@@ -25,7 +25,7 @@ steps:
       '--region', 'europe-west1',
       '--platform', 'managed',
       '--allow-unauthenticated',
-      '--port', '5000',
+      '--port', '8080',
       '--set-env-vars', 'PROJECT_ID=$PROJECT_ID,LOCATION=europe-west1,DB_HOST=$_DB_HOST,DB_USER=$_DB_USER,DB_PASSWORD=$_DB_PASSWORD,DB_NAME=$_DB_NAME'
     ]
 
