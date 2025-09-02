@@ -1,3 +1,4 @@
+import os
 import vertexai                           # Libreria per Google Vertex AI
 from vertexai.generative_models import GenerativeModel  # Modello AI Gemini
 from flask import Flask, request, jsonify # Flask per web server
@@ -119,5 +120,8 @@ if __name__ == '__main__':
     # Inizializza database all'avvio
     init_database() # Inizializza il database
     print("Database inizializzato!")
-    print("Backend Flask avviato su http://localhost:5000")
-    app.run(debug=True, port=5000) # Avvia il server Flask sulla porta 5000
+    
+    # Usa la porta da variabile d'ambiente (Cloud Run) o default 5000 (locale)
+    port = int(os.environ.get('PORT', 5000))
+    print(f"Backend Flask avviato su porta {port}")
+    app.run(debug=True, host='0.0.0.0', port=port) # Avvia il server Flask
