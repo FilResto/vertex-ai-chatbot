@@ -1,0 +1,40 @@
+# Cloud Build configuration for Vertex AI Chatbot
+steps:
+  # Step 1: Build the Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'build', 
+      '-t', 'gcr.io/$PROJECT_ID/vertex-ai-chatbot:$COMMIT_SHA',
+      '-t', 'gcr.io/$PROJECT_ID/vertex-ai-chatbot:latest',
+      '.'
+    ]
+
+  # Step 2: Push the image to Google Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/vertex-ai-chatbot:$COMMIT_SHA']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/vertex-ai-chatbot:latest']
+
+  # Step 3: Deploy to Cloud Run (optional - uncomment if you want to deploy)
+  # - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  #   entrypoint: 'gcloud'
+  #   args: [
+  #     'run', 'deploy', 'vertex-ai-chatbot',
+  #     '--image', 'gcr.io/$PROJECT_ID/vertex-ai-chatbot:$COMMIT_SHA',
+  #     '--region', 'europe-west1',
+  #     '--platform', 'managed',
+  #     '--allow-unauthenticated',
+  #     '--port', '5000',
+  #     '--set-env-vars', 'PROJECT_ID=$PROJECT_ID'
+  #   ]
+
+# Images to be pushed to Google Container Registry
+images:
+  - 'gcr.io/$PROJECT_ID/vertex-ai-chatbot:$COMMIT_SHA'
+  - 'gcr.io/$PROJECT_ID/vertex-ai-chatbot:latest'
+
+# Options for the build
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: 'E2_HIGHCPU_8'

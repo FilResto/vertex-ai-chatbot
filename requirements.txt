@@ -1,0 +1,6 @@
+flask
+flask-cors
+google-cloud-aiplatform
+vertexai
+PyMySQL
+python-dotenv
