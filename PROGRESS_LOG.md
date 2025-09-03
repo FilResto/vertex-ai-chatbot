@@ -120,7 +120,7 @@ python app.py
 # Vai su http://localhost:5000
 ```
 
----s
+---se
 
 ## 🔗 **Link Utili**
 

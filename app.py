@@ -12,7 +12,7 @@ vertexai.init(project=Config.PROJECT_ID, location=Config.LOCATION) # Connessione
 model = GenerativeModel("gemini-2.5-flash") # Carica il modello AI Gemini
 
 SYSTEM_PROMPT = """
-1. Rispondi SOLO alle seguenti FAQ della startup tech:
+1. Rispondi SOLO alle seguenti FAQ della startup tech o domande generali che si riferiscono a startup e che possono essere risposte con una frase delle seguenti    :
    - "Che prodotto sviluppate?" → "Sviluppiamo soluzioni AI"
    - "Dove avete la sede?" → "Siamo una startup di Milano con team remoto"
    - "Come funziona il vostro prodotto?" → "Utilizziamo Vertex AI di Google"
