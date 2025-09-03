@@ -218,6 +218,7 @@ DB_NAME=$_DB_NAME
 | 3. CI/CD Pipeline | ✅ COMPLETATO | 100% | Build e deploy automatizzati |
 | 4. Cloud Run Deploy | ✅ COMPLETATO | 100% | Servizio serverless pubblico |
 | 5. MCP Integration | ✅ COMPLETATO | 100% | Web scraping e conoscenza estesa |
+| 6. A2A Secure Communication | ✅ COMPLETATO | 100% | Comunicazione sicura tra servizi |
 
 **Progresso Totale: 100%** 🚀
 
@@ -272,6 +273,79 @@ fallback_info = {
     'ai': 'Specializzati in intelligenza artificiale e machine learning',
     'startup': 'Alomana è una startup tech innovativa nel settore AI'
 }
+```
+
+---
+
+## ✅ **Step 6 - A2A Secure Communication (Application-to-Application)** - COMPLETATO
+
+### 🎯 **A cosa serve:**
+Implementare comunicazione sicura tra servizi Google Cloud usando Service Account dedicati e autenticazione automatica, eliminando la necessità di gestire credenziali hardcoded.
+
+### 🛠️ **Comandi utilizzati:**
+```bash
+# 1. Verificare Service Account esistenti
+gcloud iam service-accounts list
+
+# 2. Creare Service Account dedicato per il chatbot
+gcloud iam service-accounts create vertex-ai-chatbot-sa \
+  --display-name="Vertex AI Chatbot Service Account" \
+  --description="Service account for Vertex AI Chatbot application"
+
+# 3. Assegnare ruoli IAM necessari
+gcloud projects add-iam-policy-binding tech-onboarding-470810 \
+  --member="serviceAccount:vertex-ai-chatbot-sa@tech-onboarding-470810.iam.gserviceaccount.com" \
+  --role="roles/aiplatform.user"
+
+gcloud projects add-iam-policy-binding tech-onboarding-470810 \
+  --member="serviceAccount:vertex-ai-chatbot-sa@tech-onboarding-470810.iam.gserviceaccount.com" \
+  --role="roles/cloudsql.client"
+
+# 4. Aggiornare Cloud Run per usare il nuovo Service Account
+gcloud run services update vertex-ai-chatbot \
+  --region=europe-west1 \
+  --service-account=vertex-ai-chatbot-sa@tech-onboarding-470810.iam.gserviceaccount.com
+```
+
+### 📁 **File creati/modificati:**
+- `secure_config.py` - Modulo per gestione sicura delle credenziali A2A
+- `app.py` - Integrazione verifica autenticazione A2A
+- `database.py` - Supporto per autenticazione A2A con fallback
+- `requirements.txt` - Aggiunta dipendenze `google-cloud-secret-manager` e `google-auth`
+
+### 🔧 **Configurazione A2A:**
+- **Service Account**: `vertex-ai-chatbot-sa@tech-onboarding-470810.iam.gserviceaccount.com`
+- **Ruoli IAM**: 
+  - `roles/aiplatform.user` - Accesso a Vertex AI
+  - `roles/cloudsql.client` - Accesso a Cloud SQL
+- **Autenticazione**: Automatica tramite Google Cloud IAM
+- **Fallback**: Sistema di fallback alle variabili d'ambiente se A2A non disponibile
+
+### 🧠 **Logica A2A:**
+1. **Service Account Dedicato**: Creato appositamente per il chatbot
+2. **Autenticazione Automatica**: Google Cloud gestisce automaticamente i token
+3. **Ruoli Minimizzati**: Solo i permessi necessari per il funzionamento
+4. **Fallback Sicuro**: Se A2A non funziona, usa variabili d'ambiente
+5. **Verifica Avvio**: Controlla l'autenticazione all'avvio dell'applicazione
+
+### 🔐 **Vantaggi A2A:**
+- ✅ **Sicurezza**: Nessuna credenziale hardcoded nel codice
+- ✅ **Rotazione Automatica**: Google gestisce automaticamente i token
+- ✅ **Audit Trail**: Tracciamento completo degli accessi
+- ✅ **Principio del Privilegio Minimo**: Solo i permessi necessari
+- ✅ **Scalabilità**: Funziona automaticamente su Cloud Run
+
+### 📊 **Struttura SecureConfig:**
+```python
+class SecureConfig:
+    def verify_authentication(self) -> bool:
+        # Verifica autenticazione A2A
+    
+    def get_database_config(self) -> dict:
+        # Configurazione database con A2A
+    
+    def get_secret(self, secret_name: str, fallback_env_var: str) -> str:
+        # Recupero sicuro dei segreti
 ```
 
 ---
@@ -464,8 +538,27 @@ https://[CLOUD_RUN_URL]/
 3. Verifica che le dipendenze requests e beautifulsoup4 siano installate
 4. Il sistema di fallback dovrebbe funzionare anche se il sito non è accessibile
 
+### Errore A2A Authentication:
+1. Verifica che il Service Account esista:
+   ```bash
+   gcloud iam service-accounts list
+   ```
+2. Controlla i ruoli IAM del Service Account:
+   ```bash
+   gcloud projects get-iam-policy tech-onboarding-470810 \
+     --flatten="bindings[].members" \
+     --format="table(bindings.role)" \
+     --filter="bindings.members:vertex-ai-chatbot-sa@tech-onboarding-470810.iam.gserviceaccount.com"
+   ```
+3. Verifica che Cloud Run usi il Service Account corretto:
+   ```bash
+   gcloud run services describe vertex-ai-chatbot --region=europe-west1
+   ```
+4. Controlla i log di Cloud Run per errori di autenticazione
+5. Il sistema di fallback dovrebbe funzionare anche se A2A non è disponibile
+
 ---
 
 **Ultimo aggiornamento**: 3 Settembre 2025  
 **Progetto**: Tech-Onboarding - Vertex AI Chatbot  
-**Status**: ✅ COMPLETATO - Tutti e 5 gli step implementati con successo!
+**Status**: ✅ COMPLETATO - Tutti e 6 gli step implementati con successo!
