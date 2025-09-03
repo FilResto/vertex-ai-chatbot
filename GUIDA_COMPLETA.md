@@ -217,8 +217,62 @@ DB_NAME=$_DB_NAME
 | 2. Cloud SQL MySQL | ✅ COMPLETATO | 100% | Salvataggio conversazioni |
 | 3. CI/CD Pipeline | ✅ COMPLETATO | 100% | Build e deploy automatizzati |
 | 4. Cloud Run Deploy | ✅ COMPLETATO | 100% | Servizio serverless pubblico |
+| 5. MCP Integration | ✅ COMPLETATO | 100% | Web scraping e conoscenza estesa |
 
 **Progresso Totale: 100%** 🚀
+
+---
+
+## ✅ **Step 5 - MCP Integration (Model Context Protocol)** - COMPLETATO
+
+### 🎯 **A cosa serve:**
+Estendere le capacità del chatbot integrando il sito web Alomana come risorsa esterna per rispondere a domande non coperte dalle FAQ base.
+
+### 🛠️ **Comandi utilizzati:**
+```bash
+# Installare dipendenze per web scraping
+pip install requests beautifulsoup4
+
+# Testare il modulo MCP localmente
+python -c "from mcp_web_scraper import get_website_context; print(get_website_context('servizi Alomana'))"
+```
+
+### 📁 **File creati/modificati:**
+- `mcp_web_scraper.py` - Modulo MCP per web scraping e estrazione informazioni
+- `app.py` - Integrazione MCP nel chatbot
+- `requirements.txt` - Aggiunta dipendenze requests e beautifulsoup4
+
+### 🔧 **Configurazione MCP:**
+- **URL Sito Web**: `https://alomana.com/`
+- **Web Scraping**: Estrazione automatica di contenuti rilevanti
+- **Fallback System**: Informazioni predefinite quando il sito non è accessibile
+- **Integrazione AI**: Contesto del sito web passato a Vertex AI
+
+### ⚠️ **Problemi risolti:**
+- ❌ **Errore 403 Forbidden**: Il sito web originale restituiva errore di accesso
+- ✅ **Soluzione**: 
+  1. Cambiato URL a `https://alomana.com/`
+  2. Migliorati headers HTTP per evitare blocchi
+  3. Implementato sistema di fallback con informazioni predefinite
+
+### 🧠 **Logica MCP:**
+1. **Controllo FAQ**: Verifica se la domanda è nelle FAQ base
+2. **Web Scraping**: Se non è FAQ base, consulta il sito web
+3. **Estrazione Info**: Estrae informazioni rilevanti dal contenuto
+4. **Fallback**: Usa informazioni predefinite se il sito non è accessibile
+5. **Integrazione AI**: Passa il contesto a Vertex AI per risposta completa
+
+### 📊 **Informazioni di Fallback:**
+```python
+fallback_info = {
+    'servizi': 'Alomana è una startup che sviluppa soluzioni AI innovative per aziende',
+    'tecnologia': 'Utilizziamo tecnologie all\'avanguardia come Vertex AI di Google',
+    'ubicazione': 'Siamo una startup con sede a Milano e team distribuito',
+    'target': 'Rivolgiamo i nostri servizi ad aziende che gestiscono grandi volumi di dati',
+    'ai': 'Specializzati in intelligenza artificiale e machine learning',
+    'startup': 'Alomana è una startup tech innovativa nel settore AI'
+}
+```
 
 ---
 
@@ -401,8 +455,17 @@ https://[CLOUD_RUN_URL]/
 3. Verifica che Vertex AI sia abilitato nel progetto
 4. Riavvia il servizio Cloud Run dopo aver aggiunto i permessi
 
+### Errore MCP Web Scraping:
+1. Verifica che il sito web sia accessibile:
+   ```bash
+   curl -I https://alomana.com/
+   ```
+2. Controlla i log per errori 403/404 del sito web
+3. Verifica che le dipendenze requests e beautifulsoup4 siano installate
+4. Il sistema di fallback dovrebbe funzionare anche se il sito non è accessibile
+
 ---
 
-**Ultimo aggiornamento**: 2 Settembre 2025  
+**Ultimo aggiornamento**: 3 Settembre 2025  
 **Progetto**: Tech-Onboarding - Vertex AI Chatbot  
-**Status**: ✅ COMPLETATO - Tutti e 4 gli step implementati con successo!
+**Status**: ✅ COMPLETATO - Tutti e 5 gli step implementati con successo!
