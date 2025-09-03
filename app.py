@@ -78,6 +78,28 @@ def get_history():
     conversations = get_recent_conversations(20) # Prende le ultime 20 conversazioni
     return jsonify({'conversations': conversations}) # Le restituisce in JSON
 
+@app.route('/test-routes', methods=['GET'])
+def test_routes():
+    """Route di debug per testare l'accesso alle diverse sezioni"""
+    from mcp_web_scraper import MCPWebScraper
+    
+    scraper = MCPWebScraper()
+    results = {}
+    
+    routes_to_test = ['home', 'pricing', 'company', 'blog', 'careers', 'contact']
+    
+    for route in routes_to_test:
+        print(f"Testando route: {route}")
+        content = scraper.get_route_content(route)
+        results[route] = {
+            'accessible': content is not None,
+            'content_length': len(content) if content else 0,
+            'url': f"https://alomana.com{scraper.routes_config[route]['url']}"
+        }
+    
+    return jsonify(results)
+
+
 @app.route('/', methods=['GET'])
 def home():
     return '''
