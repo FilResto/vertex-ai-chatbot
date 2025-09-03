@@ -7,7 +7,7 @@ Un chatbot intelligente che usa **Vertex AI** per rispondere alle FAQ aziendali 
 ✅ **Step 1 COMPLETATO**: Agent Vertex AI con Gemini 2.5 Flash Lite  
 ✅ **Step 2 COMPLETATO**: Salvataggio conversazioni in Cloud SQL MySQL  
 ✅ **Step 3 COMPLETATO**: CI/CD Pipeline con Cloud Build  
-✅ **Step 4 COMPLETATO**: Deploy su Cloud Run 🚀  
+✅ **Step 4 COMPLETATO**: Deploy su Cloud Run 🚀 (con permessi Vertex AI)  
 
 ## 📋 Prerequisiti
 
