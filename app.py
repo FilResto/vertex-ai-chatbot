@@ -5,6 +5,7 @@ from flask import Flask, request, jsonify # Flask per web server
 from flask_cors import CORS               # Per permettere richieste da browser
 from database import init_database, save_conversation, get_recent_conversations  # Funzioni database
 from config import Config                 # Configurazioni (database, project ID, etc.)
+from mcp_web_scraper import get_website_context  # MCP per consultare il sito web
 
 
 # Inizializza Vertex AI
@@ -12,17 +13,16 @@ vertexai.init(project=Config.PROJECT_ID, location=Config.LOCATION) # Connessione
 model = GenerativeModel("gemini-2.5-flash") # Carica il modello AI Gemini
 
 SYSTEM_PROMPT = """
-1. Rispondi SOLO alle seguenti FAQ della startup tech o domande generali che si riferiscono a startup e che possono essere risposte con una frase delle seguenti    :
+1. Rispondi SOLO alle seguenti FAQ della startup tech o domande generali che si riferiscono a startup e che possono essere risposte con una frase delle seguenti:
    - "Che prodotto sviluppate?" → "Sviluppiamo soluzioni AI"
    - "Dove avete la sede?" → "Siamo una startup di Milano con team remoto"
    - "Come funziona il vostro prodotto?" → "Utilizziamo Vertex AI di Google"
    - "Chi può usare il prodotto?" → "Aziende che gestiscono grandi volumi di documenti"
    - "Quanto costa?" → "Offriamo piani personalizzati in base al numero delle richieste/volume dell'azienda"
 
-2. Se l'utente chiede qualcosa NON nelle FAQ sopra, rispondi:
-   "Mi dispiace, posso rispondere solo alle FAQ aziendali."
+2. Se l'utente chiede qualcosa NON nelle FAQ sopra, consulta il sito web Alomana per trovare informazioni aggiuntive.
 
-3. Non inventare informazioni non presenti nelle FAQ sopra.
+3. Non inventare informazioni non presenti nelle FAQ o nel sito web.
 """
 # Le istruzioni per l'AI:
     # - Risponde solo alle FAQ specifiche
@@ -40,8 +40,23 @@ def chat():
         
         print(f"Ricevuto messaggio: {user_message}")
         
-        # Chiama Vertex AI
-        full_prompt = f"{SYSTEM_PROMPT}\n\nUtente: {user_message}\nAssistente:"
+        # Controlla se la domanda è nelle FAQ base
+        faq_keywords = ['prodotto', 'sede', 'funziona', 'chi può', 'costo', 'quanto costa']
+        is_faq = any(keyword in user_message.lower() for keyword in faq_keywords)
+        
+        # Se non è una FAQ base, consulta il sito web con MCP
+        website_context = ""
+        if not is_faq:
+            print("Domanda non nelle FAQ base, consultando il sito web...")
+            website_context = get_website_context(user_message)
+            print(f"Contesto dal sito web: {website_context[:200]}...")
+        
+        # Chiama Vertex AI con il contesto del sito web
+        full_prompt = f"{SYSTEM_PROMPT}\n\n"
+        if website_context:
+            full_prompt += f"Informazioni dal sito web Alomana:\n{website_context}\n\n"
+        full_prompt += f"Utente: {user_message}\nAssistente:"
+        
         print(f"Chiamando Vertex AI...")
         response = model.generate_content(full_prompt) # Genera la risposta dell'AI
         ai_response = response.text # Prende la risposta
