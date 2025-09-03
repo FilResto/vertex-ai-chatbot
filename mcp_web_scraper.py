@@ -8,7 +8,7 @@ class MCPWebScraper:
     Model Context Protocol - Web Scraper per estrarre informazioni dal sito web
     """
     
-    def __init__(self, website_url: str = "https://skillcurb.com/ai_app_locator/alomana/"):
+    def __init__(self, website_url: str = "https://alomana.com/"):
         self.website_url = website_url
         self.session = requests.Session()
         self.session.headers.update({
@@ -115,7 +115,7 @@ class MCPWebScraper:
         """
         Cerca informazioni specifiche nel sito web basandosi sulla query
         """
-        content = self.get_website_content()
+        content = self.get_website_content() #se il sito ritorna niente, usa le informazioni di fallback
         if not content:
             print("Sito web non accessibile, usando informazioni di fallback...")
             return self.get_fallback_info(query)
