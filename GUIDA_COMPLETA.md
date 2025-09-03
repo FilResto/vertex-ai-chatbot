@@ -181,6 +181,22 @@ docker run -p 8080:8080 vertex-ai-chatbot
 - ❌ **Errore Database**: Connessione fallita per IP non autorizzato
 - ✅ **Soluzione**: Aggiunto `0.0.0.0/0` alle reti autorizzate di Cloud SQL
 
+- ❌ **Errore Vertex AI**: `Permission 'aiplatform.endpoints.predict' denied on resource '//aiplatform.googleapis.com/projects/tech-onboarding-470810/locations/europe-west1/publishers/google/models/gemini-2.5-flash'`
+- ✅ **Soluzione**: Aggiunto permessi Vertex AI al service account di Cloud Run:
+  ```bash
+  gcloud projects add-iam-policy-binding tech-onboarding-470810 \
+    --member="serviceAccount:483650106826-compute@developer.gserviceaccount.com" \
+    --role="roles/aiplatform.user"
+  
+  gcloud projects add-iam-policy-binding tech-onboarding-470810 \
+    --member="serviceAccount:483650106826-compute@developer.gserviceaccount.com" \
+    --role="roles/aiplatform.serviceAgent"
+  
+  gcloud projects add-iam-policy-binding tech-onboarding-470810 \
+    --member="serviceAccount:483650106826-compute@developer.gserviceaccount.com" \
+    --role="roles/ml.developer"
+  ```
+
 ### 🔧 **Variabili d'Ambiente Cloud Run:**
 ```
 PROJECT_ID=$PROJECT_ID
@@ -254,6 +270,24 @@ gcloud artifacts repositories create vertex-ai-chatbot \
 gcloud projects add-iam-policy-binding [PROJECT_ID] \
     --member="serviceAccount:[SERVICE_ACCOUNT]" \
     --role="roles/run.admin"
+
+# Aggiungere permessi Vertex AI a Cloud Run
+gcloud projects add-iam-policy-binding [PROJECT_ID] \
+    --member="serviceAccount:[SERVICE_ACCOUNT]" \
+    --role="roles/aiplatform.user"
+
+gcloud projects add-iam-policy-binding [PROJECT_ID] \
+    --member="serviceAccount:[SERVICE_ACCOUNT]" \
+    --role="roles/aiplatform.serviceAgent"
+
+gcloud projects add-iam-policy-binding [PROJECT_ID] \
+    --member="serviceAccount:[SERVICE_ACCOUNT]" \
+    --role="roles/ml.developer"
+
+# Aggiungere permessi Cloud SQL a Cloud Run
+gcloud projects add-iam-policy-binding [PROJECT_ID] \
+    --member="serviceAccount:[SERVICE_ACCOUNT]" \
+    --role="roles/cloudsql.client"
 
 # Verificare permessi
 gcloud projects get-iam-policy [PROJECT_ID]
@@ -355,6 +389,17 @@ https://[CLOUD_RUN_URL]/
 1. Verifica che la porta sia configurata correttamente
 2. Controlla i log per errori specifici
 3. Verifica le variabili d'ambiente
+
+### Errore Vertex AI su Cloud Run:
+1. Verifica che il service account di Cloud Run abbia i permessi corretti:
+   ```bash
+   gcloud projects add-iam-policy-binding [PROJECT_ID] \
+     --member="serviceAccount:[SERVICE_ACCOUNT]" \
+     --role="roles/aiplatform.user"
+   ```
+2. Controlla i log di Cloud Run per errori di permessi
+3. Verifica che Vertex AI sia abilitato nel progetto
+4. Riavvia il servizio Cloud Run dopo aver aggiunto i permessi
 
 ---
 
