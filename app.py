@@ -5,10 +5,11 @@ from flask import Flask, request, jsonify # Flask per web server
 from flask_cors import CORS               # Per permettere richieste da browser
 from database import init_database, save_conversation, get_recent_conversations  # Funzioni database
 from config import Config                 # Configurazioni (database, project ID, etc.)
+from secure_config import secure_config   # Configurazione sicura A2A
 from mcp_web_scraper import get_website_context  # MCP per consultare il sito web
 
 
-# Inizializza Vertex AI
+# Inizializza Vertex AI con autenticazione automatica
 vertexai.init(project=Config.PROJECT_ID, location=Config.LOCATION) # Connessione a Google Cloud
 model = GenerativeModel("gemini-2.5-flash") # Carica il modello AI Gemini
 
@@ -146,6 +147,13 @@ def home():
 
 if __name__ == '__main__':
     try:
+        # Verifica autenticazione A2A
+        print("🔐 Verificando autenticazione A2A...")
+        if secure_config.verify_authentication():
+            print("✅ Autenticazione A2A verificata con successo!")
+        else:
+            print("⚠️ Autenticazione A2A non disponibile, usando fallback...")
+        
         # Inizializza database all'avvio
         print("Inizializzazione database...")
         init_database() # Inizializza il database

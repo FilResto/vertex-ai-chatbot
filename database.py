@@ -1,8 +1,26 @@
 import pymysql # Libreria per connettersi a MySQL
 from config import Config # Configurazioni database
+from secure_config import secure_config # Configurazione sicura A2A
 from datetime import datetime # Per gestire date/ore
 
 def get_connection(): # Funzione per connettersi al database
+    # Usa configurazione sicura A2A se disponibile, altrimenti fallback a Config
+    try:
+        db_config = secure_config.get_database_config()
+        if all(db_config.values()):  # Se tutte le credenziali sono disponibili
+            print("🔐 Usando autenticazione A2A sicura per il database")
+            return pymysql.connect(
+                host=db_config['host'],
+                user=db_config['user'],
+                password=db_config['password'],
+                database=db_config['database'],
+                charset='utf8mb4'
+            )
+    except Exception as e:
+        print(f"⚠️ Errore con configurazione sicura, usando fallback: {e}")
+    
+    # Fallback alla configurazione tradizionale
+    print("🔧 Usando configurazione tradizionale per il database")
     return pymysql.connect( # Crea connessione usando:
         host=Config.DB_HOST, #indirizzo db
         user=Config.DB_USER, #username

@@ -6,3 +6,5 @@ PyMySQL
 python-dotenv
 requests
 beautifulsoup4
+google-cloud-secret-manager
+google-auth
