@@ -34,18 +34,29 @@ CORS(app) # Permette richieste da browser (per l'interfaccia web)
 
 @app.route('/chat', methods=['POST']) # Route per ricevere messaggi
 def chat():
-    user_message = request.json['message'] # Prende il messaggio dall'utente
-    user_ip = request.remote_addr # Prende l'IP dell'utente
+    try:
+        user_message = request.json['message'] # Prende il messaggio dall'utente
+        user_ip = request.remote_addr # Prende l'IP dell'utente
+        
+        print(f"Ricevuto messaggio: {user_message}")
+        
+        # Chiama Vertex AI
+        full_prompt = f"{SYSTEM_PROMPT}\n\nUtente: {user_message}\nAssistente:"
+        print(f"Chiamando Vertex AI...")
+        response = model.generate_content(full_prompt) # Genera la risposta dell'AI
+        ai_response = response.text # Prende la risposta
+        print(f"Risposta AI: {ai_response}")
+        
+        # 🔥 SALVA NEL DATABASE
+        save_conversation(user_message, ai_response, user_ip) # Salva tutto nel database
+        
+        return jsonify({'response': ai_response}) # Restituisce la risposta in JSON
     
-    # Chiama Vertex AI
-    full_prompt = f"{SYSTEM_PROMPT}\n\nUtente: {user_message}\nAssistente:"
-    response = model.generate_content(full_prompt) # Genera la risposta dell'AI
-    ai_response = response.text # Prende la risposta
-    
-    # 🔥 SALVA NEL DATABASE
-    save_conversation(user_message, ai_response, user_ip) # Salva tutto nel database
-    
-    return jsonify({'response': ai_response}) # Restituisce la risposta in JSON
+    except Exception as e:
+        print(f"Errore nel chat: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': f'Errore interno: {str(e)}'}), 500
 
 @app.route('/history', methods=['GET'])
 def get_history():
